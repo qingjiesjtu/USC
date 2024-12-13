@@ -28,3 +28,5 @@ In our submission, we design a binary classification probing experiment using tu
 In our submission, we design a method to interpret the prompt bias: Prompt Attribution and Contribution Tracking (PACT). It can measure the contribution of each token or sequence to LLMs' final answers. We find that when the correct answer is overturned, the tokens in the refinement prompt are generally greener than tokens in the original question. This indicates that LLMs are biased toward refinement prompt rather than the original question itself, leading to wrong answers. When the initial correct answer is retained, tokens in the original question are greener. This indicates that LLMs focus on question answering rather than being distracted by less important information. Results are shown in Figure 4.
 
 We release the code of PACT for Llama and ChatGPT in `./PACT.ipynb`
+
+I
