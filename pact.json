@@ -1,0 +1,14 @@
+[
+    {
+        "question": "Is here comes the sun a beatles song?",
+        "answer": "Yes.",
+        "refinement":"Are you sure about your answer? Think and answer again.",
+        "target":"No"
+    },        
+    {
+        "question": "Is Australia part for the ring of fire?",
+        "answer": "No.",
+        "refinement":"Are you sure about your answer? Think and answer again.",
+        "target":"Yes"
+    }
+]

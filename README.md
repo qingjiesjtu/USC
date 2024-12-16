@@ -1,32 +1,97 @@
 # Understanding the Dark Side of LLMs’ Intrinsic Self-Correction
 
-This is the project repository of our anonymous submission.
+This is the code repository of our anonymous submission: Understanding the Dark Side of LLMs’ Intrinsic Self-Correction.
+This repository contains the codes for:
+1. Evaluating LLMs' intrinsic self-correction on Yes/No question answering task.
+2. Evaluating LLMs' final answer wavering in a 10-round conversation.
+3. Probing LLMs' internal answers.
+4. Interpreting LLMs' prompt bias: Prompt Attribution and Contribution Tracking (PACT).
 
-## Abstract of our submission
-Intrinsic self-correction was proposed to refine LLMs' responses via feedback prompts solely based on their inherent capability to improve their performance However, other recent works show that intrinsic self-correction fails without oracle labels as feedback. In this paper, our goal is to investigate the question of *how to interpret LLMs’ intrinsic self-correction in different tasks?* By including simple factual questions and three complex tasks with state-of-the-art (SOTA) LLMs like ChatGPT families (o1, 4o, 3.5-turbo) and Llama families (2-7B, 3-8B, and 3.1-8B), we achieve our goal by designing three interpretation methods to reveal the dark side of LLMs’ intrinsic self-correction. We identify intrinsic self-correction can (1) cause LLMs to waver both intermedia and final answers and lead to prompt bias on simple factual questions; (2) introduce human-like cognitive bias on complex tasks. In light of our findings, we also provide two simple, low-cost, yet effective mitigation methods: question repeating and supervised fine-tuning.
+Please also check our anonymous [project website](https://x-isc.github.io).
 
-<div align="center">
-    <img src="overview.png" alt="description" width="500">
-</div>
+## Setup
+
+### Environment Setup
+1. Create a new conda environment:
+```bash
+conda create -n self-correction python=3.9 -y  # Python >= 3.9 required
+conda activate self-correction
+```
+
+2. Install PyTorch:
+- Visit [PyTorch's website](https://pytorch.org/get-started/locally/) to install PyTorch 2.5.1 with the configuration matching your hardware.
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### API Configuration
+- For OpenAI models: Configure `OPENAI_API_KEY` and `OPENAI_ENDPOINT` in `llm_inference/api_config.py`
+- For local models: Set up your [Hugging Face access token](https://huggingface.co/docs/hub/index) or login to huggingface.co, and than you can use the default model path
 
 
-## Internal Answer Wavering
-<div align="center">
-    <img src="internalAnswerWavering.png" alt="description" width="500">
-</div>
+## 1. Evaluating LLMs' intrinsic self-correction on Yes/No question answering task.
+Reproduce Table 1: Self-correction performance on Yes/No question answering tasks
 
-In our submission, we design a binary classification probing experiment using tuned lens to probe LLM's internal token representations at each layer. We find that self-correction can cause internal answer wavering. Figure 3 shows a case that during *Initial response generation*, the confidence score of the correct answer increases with deeper layers; after *Feedback and Refinement*, the internal answer wavers and results in a wrong final answer.
+```bash
+python run_self_correction.py --model llama3-8b-instruct --devices 0
+```
 
- We release the code of probing the internal answer of Llama in `./probing.ipynb`
+Available models:
+- llama2-7b-instruct
+- llama3-8b-instruct
+- llama3.1-8b-instruct
+- gpt3.5-turbo
+- gpt4o
+- o1-preview
+- o1-mini
 
-## Prompt Bias
+--devices: GPU ids, eg: "0,1" to use two or more GPUs or "0" to use the first GPU
 
-<div align="center">
-    <img src="promptBias.png" alt="description" width="500">
-</div>
+Results will be saved in `./results/$MODEL_NAME/self_correction/`
 
-In our submission, we design a method to interpret the prompt bias: Prompt Attribution and Contribution Tracking (PACT). It can measure the contribution of each token or sequence to LLMs' final answers. We find that when the correct answer is overturned, the tokens in the refinement prompt are generally greener than tokens in the original question. This indicates that LLMs are biased toward refinement prompt rather than the original question itself, leading to wrong answers. When the initial correct answer is retained, tokens in the original question are greener. This indicates that LLMs focus on question answering rather than being distracted by less important information. Results are shown in Figure 4.
+To generate the summary table for all models:
+```bash
+python draw/metric.py  # Outputs to ./metric.csv
+```
 
-We release the code of PACT for Llama and ChatGPT in `./PACT.ipynb`
+## 2. Evaluating LLMs' final answer wavering in a 10-round conversation.
+Reproduce Figure 2: Analysis of how LLMs change their final answers in a 10-round conversation
 
-I
+```bash
+python run_self_correction.py --model $MODEL_NAME --devices $DEVICES --repeat_exp --rounds 10
+```
+
+To generate the visualization:
+```bash
+python draw/change_answer_times.py  # Outputs to ./model_answer_change.pdf
+```
+
+## 3. Probing LLMs' internal answers.
+Reproduce Figure 3: Analysis of internal answer changes during self-correction
+
+```bash
+# With attack
+python run_lens.py --model llama3-8b-instruct --devices $DEVICES --exp tuned_lens
+
+# Round 0: without attack
+python run_lens.py --model llama3-8b-instruct --devices $DEVICES --exp tuned_lens --round 0
+```
+
+Base on the results, you can generate the visualizations:
+```bash
+# Figure 3 Left: Internal answer wavering
+python draw/case_lens_internal_answer_wavering.py --model llama3-8b-instruct
+
+# Figure 3 Right: "Are you sure?" vs. "You are wrong"
+python draw/average_layer_confidence.py --model llama3-8b-instruct
+```
+
+Note: Use `--devices` to specify GPU devices (e.g., "0,1" for multiple GPUs, "0" for single GPU)
+
+## 4. Interpreting LLMs' prompt bias: Prompt Attribution and Contribution Tracking (PACT).
+
+Reproduce Figure 4: Analysis of prompt bias during self_correction
+
+Follow our tutorial `./pact.ipynb` to generate PACT visualization.

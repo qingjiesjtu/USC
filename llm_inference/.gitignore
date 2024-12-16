@@ -1,0 +1,6 @@
+/api_config.py
+/trash
+/__pycache__
+/model/__pycache__
+*.log
+/exp.py
