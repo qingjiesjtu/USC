@@ -7,7 +7,7 @@ This repository contains the codes for:
 3. Probing LLMs' internal answers.
 4. Interpreting LLMs' prompt bias: Prompt Attribution and Contribution Tracking (PACT).
 
-Please also check our anonymous [project website](https://x-isc.github.io).
+Please also check our [project website](https://ex-isc.github.io).
 
 ## Setup
 
